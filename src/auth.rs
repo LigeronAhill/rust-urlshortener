@@ -31,11 +31,9 @@ pub async fn auth(
         })?;
     let fetch_to = tokio::time::Duration::from_millis(300);
     let settings = tokio::time::timeout(fetch_to, repo.get_settings()).await.map_err(internal_error)?.map_err(internal_error)?;
-    println!("settings: {:?}", settings);
     let mut hasher = Sha3_256::new();
     hasher.update(api_key.as_bytes());
     let provided_api_key = hasher.finalize();
-    println!("provided_api_key: {:x}", provided_api_key);
     if settings.encrypted_global_api_key != format!("{provided_api_key:x}") {
         tracing::error!("Unauthorized call to API: Invalid key");
         counter!("unauthenticated_calls_count", &labels);
